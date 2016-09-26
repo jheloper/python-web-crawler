@@ -1,6 +1,6 @@
-import spider as sp
+import example.spider as sp
 
-#sp.rocketpunchSpider("개발자", "python+ruby", 1)
-sp.saraminSpider("파이썬")
-sp.saraminSpider("python")
-sp.saraminSpider("ruby")
+# sp.rocketpunch_spider("개발자", "python+ruby", 1)
+sp.saramin_spider("파이썬")
+sp.saramin_spider("python")
+sp.saramin_spider("ruby")

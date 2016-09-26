@@ -2,17 +2,20 @@ from bs4 import BeautifulSoup
 from urllib import parse
 from urllib.request import urlopen
 
-#TODO 현재는 1페이지의 데이터만 가져오고 있다. 페이지 수를 파라미터로 받아 페이지 수만큼의 데이터를 추출하는 로직을 추가해볼까?
-def rocketpunchSpider(paramJobKind, paramSpecialty, paramMaxPage):
-    rocketpunchUrl = "https://www.rocketpunch.com"
 
-    jobKind = paramJobKind
-    jobKind = parse.quote(jobKind)
+# TODO 현재는 1페이지의 데이터만 가져오고 있다. 페이지 수를 파라미터로 받아 페이지 수만큼의 데이터를 추출하는 로직을 추가해볼까?
+def rocketpunch_spider(
+        param_job_kind, param_specialty, param_max_page):
 
-    specialty = paramSpecialty
-    maxPage = paramMaxPage
+    rocketpunch_url = "https://www.rocketpunch.com"
 
-    res = urlopen(rocketpunchUrl + "/jobs?job=" + jobKind + "&specialty=" + specialty).read().decode('utf-8')
+    job_kind = param_job_kind
+    job_kind = parse.quote(job_kind)
+
+    specialty = param_specialty
+    maxPage = param_max_page
+
+    res = urlopen(rocketpunch_url + "/jobs?job=" + job_kind + "&specialty=" + specialty).read().decode('utf-8')
 
     soup = BeautifulSoup(res, 'html.parser')
     print(soup.title)
@@ -20,46 +23,48 @@ def rocketpunchSpider(paramJobKind, paramSpecialty, paramMaxPage):
     jobs = soup.find_all("div", class_="card job list")
 
     for job in jobs:
-        jobDetail = job.find("div", class_="summary").find("a")
-        #카테고리 태그...
-        jobTags = job.find("ul", class_="tags").find_all("a", class_="btn-tag")
-        #신입, 경력, 경력무관...
-        jobIcs = job.select("dd.dd > span.ic-text")
-        #등록 or 수정일자
-        jobDateReg = job.find("div", class_="date reg")
-        #마감일자
-        jobDateEnd = job.find("div", class_="date end")
+        job_detail = job.find("div", class_="summary").find("a")
+        # 카테고리 태그...
+        job_tags = job.find("ul", class_="tags").find_all("a", class_="btn-tag")
+        # 신입, 경력, 경력무관...
+        job_ics = job.select("dd.dd > span.ic-text")
+        # 등록 or 수정일자
+        job_reg_date = job.find("div", class_="date reg")
+        # 마감일자
+        job_end_date = job.find("div", class_="date end")
         print("*" * 50)
-        print(jobDetail.find("h4", class_="jobtitle").contents[0].string)
-        print(jobDetail.find("h4", class_="jobtitle").contents[1].string)
-        tagStr = ""
-        for jobTag in jobTags:
-            tagStr += jobTag.string + "|"
-        print(tagStr)
+        print(job_detail.find("h4", class_="jobtitle").contents[0].string)
+        print(job_detail.find("h4", class_="jobtitle").contents[1].string)
+        tag_str = ""
+        for jobTag in job_tags:
+            tag_str += jobTag.string + "|"
+        print(tag_str)
 
-        icStr = ""
-        for jobIc in jobIcs:
-            icStr += jobIc.string + "|"
-        print(icStr)
-        print(jobDateReg.string)
-        print(jobDateEnd.string)
-        print(rocketpunchUrl + job.find("div", class_="summary").a["href"])
+        ic_str = ""
+        for job_ic in job_ics:
+            ic_str += job_ic.string + "|"
+        print(ic_str)
+        print(job_reg_date.string)
+        print(job_end_date.string)
+        print(rocketpunch_url + job.find("div", class_="summary").a["href"])
 
-def saraminSpider(paramSearchWord):
 
-    #TODO searchWord를 list를 받았을 때에 대한 처리를 추가하고, list만큼 크롤링하도록 수정해야 함. 또한 searchWord가 str, 혹은 list가 아닐 때에 예외 처리하도록 수정할 것.
-    if(type(paramSearchWord) == str):
-        searchWord = paramSearchWord
-    elif(type(paramSearchWord) == list):
-        searchWord = paramSearchWord
+def saramin_spider(param_search_word):
+    # TODO searchWord를 list를 받았을 때에 대한 처리를 추가하고, list만큼 크롤링하도록 수정해야 함.
+    # 또한 searchWord가 str, 혹은 list가 아닐 때에 예외 처리하도록 수정할 것.
+    if(type(param_search_word) == str):
+        search_word = param_search_word
+    elif(type(param_search_word) == list):
+        search_word = param_search_word
     else:
-        searchWord = None
+        search_word = None
 
-    searchWord = parse.quote(searchWord, encoding='euc-kr')
+    search_word = parse.quote(search_word, encoding='euc-kr')
 
-    saraminUrl = "http://www.saramin.co.kr"
+    saramin_url = "http://www.saramin.co.kr"
 
-    res = urlopen(saraminUrl + "/zf_user/search/recruit?company_cd=1&searchword=" + searchWord + "&go=&searchType=").read().decode('euc-kr')
+    res = urlopen(saramin_url + "/zf_user/search/recruit?company_cd=1&searchword=" + search_word + "&go=&searchType=")\
+        .read().decode('euc-kr')
     soup = BeautifulSoup(res, "html.parser")
     print(soup.title)
 
