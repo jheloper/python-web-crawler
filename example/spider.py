@@ -1,23 +1,20 @@
 from bs4 import BeautifulSoup
-from urllib import parse
-from urllib.request import urlopen
+import requests as rqsts
 
-
-# TODO 현재는 1페이지의 데이터만 가져오고 있다. 페이지 수를 파라미터로 받아 페이지 수만큼의 데이터를 추출하는 로직을 추가해볼까?
+# 현재는 1페이지의 데이터만 가져오고 있다. 페이지 수를 파라미터로 받아 페이지 수만큼의 데이터를 추출하는 로직을 추가해볼까?
 def rocketpunch_spider(
         param_job_kind, param_specialty, param_max_page):
 
     rocketpunch_url = "https://www.rocketpunch.com"
 
     job_kind = param_job_kind
-    job_kind = parse.quote(job_kind)
 
     specialty = param_specialty
     maxPage = param_max_page
 
-    res = urlopen(rocketpunch_url + "/jobs?job=" + job_kind + "&specialty=" + specialty).read().decode('utf-8')
+    res = rqsts.get(rocketpunch_url + "/jobs?job=" + job_kind + "&specialty=" + specialty)
 
-    soup = BeautifulSoup(res, 'html.parser')
+    soup = BeautifulSoup(res.text, 'html.parser')
     print(soup.title)
 
     jobs = soup.find_all("div", class_="card job list")
@@ -46,7 +43,11 @@ def rocketpunch_spider(
         print(ic_str)
         print(job_reg_date.string)
         print(job_end_date.string)
-        print(rocketpunch_url + job.find("div", class_="summary").a["href"])
+        detail_url = rocketpunch_url + job.find("div", class_="summary").a["href"]
+        print(detail_url)
+        detail_res = rqsts.get(detail_url)
+        detail_soup = BeautifulSoup(detail_res.text, 'html.parser')
+        print(detail_soup.find("dl", class_="infoset"))
 
 
 def saramin_spider(param_search_word):
@@ -59,13 +60,11 @@ def saramin_spider(param_search_word):
     else:
         search_word = None
 
-    search_word = parse.quote(search_word, encoding='euc-kr')
-
     saramin_url = "http://www.saramin.co.kr"
 
-    res = urlopen(saramin_url + "/zf_user/search/recruit?company_cd=1&searchword=" + search_word + "&go=&searchType=")\
-        .read().decode('euc-kr')
-    soup = BeautifulSoup(res, "html.parser")
+    res = rqsts.get(saramin_url + "/zf_user/search/recruit?company_cd=1&searchword=" + search_word + "&go=&searchType=")
+
+    soup = BeautifulSoup(res.text, "html.parser")
     print(soup.title)
 
     jobs = soup.find_all("li", class_="list")
@@ -74,3 +73,8 @@ def saramin_spider(param_search_word):
         print("*" * 50)
         print(job.select("dt span")[0]["title"])
         print(job.select("dd.multiline > a")[0]["title"])
+        print(saramin_url + job.select("dd.multiline > a")[0]["href"])
+        detail_res = rqsts.get(saramin_url + job.select("dd.multiline > a")[0]["href"])
+        detail_soup = BeautifulSoup(detail_res.text, 'html.parser')
+        # 있을 수도 있고, 없을 수도 있다. 말하자면 필수가 아니다...
+        print(detail_soup.select("div.recruit_summary")[1])
